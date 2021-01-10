@@ -1,0 +1,260 @@
+{% extends 'shop/basic.html'%}
+{% block title%} CartSouk.in {% endblock%}
+{% block style %}
+
+        .col-md-3 {
+            display: inline-block;
+            margin-left: -4px;
+        }
+
+        .col-md-3 {
+            width: 100%;
+            height: auto;
+        }
+
+        body .carousel-control-indicator li {
+            background-color: blue;
+        }
+
+        body .carousel-control-prev-icon body .carousel-control-next-icon {
+            background-color: blue;
+        }
+
+        body .no-padding {
+            padding-left: 0;
+            padding-right: 0;
+        }
+
+        .carousel-control-prev-icon {
+            background: black no-repeat center center;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='%23fff' viewBox='0 0 8 8'%3e%3cpath d='M5.25 0l-4 4 4 4 1.5-1.5-2.5-2.5 2.5-2.5-1.5-1.5z'/%3e%3c/svg%3e");
+
+        }
+
+        .carousel-control-next-icon {
+            background: black no-repeat center center;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='%23fff' viewBox='0 0 8 8'%3e%3cpath d='M2.75 0l-1.5 1.5 2.5 2.5-2.5 2.5 1.5 1.5 4-4-4-4z'/%3e%3c/svg%3e");
+
+        }
+        body .carousel-indicators{
+        bottom:0;
+        }
+
+        .carousel-indicators .active{
+        background-color: blue;
+        }
+
+        .carousel-control-next, .carousel-control-prev{
+        top: auto;
+        bottom: auto;
+        padding-top: 198px;
+        }
+
+
+
+        .card-img-top{
+        width: 206px;
+        height: 164px;
+<!--        margin-left: 23px;-->
+        }
+
+        .h2, h2 {
+        font-size: 26px;
+        margin: 9px;
+        }
+
+       .carousel-indicators{
+        padding-top: 2rem;
+        height: 0rem;
+        }
+
+        .carousel, slide {
+        margin-bottom: 1rem;
+        padding-bottom: 2rem;
+        }
+
+{% endblock %}
+
+
+{% block body%}
+
+  <div class="container">
+
+      {% for prod, range, nSlides in allProds %}
+      <h2>{{prod.0.category}}</h2>
+      <div class="row">
+        <div id="demo{{forloop.counter}}" class=" col carousel slide my-3" >
+          <ul class="carousel-indicators">
+            <li  class="active" data-slide-to="0" data-target="#demo{{forloop.counter}}"></li>
+            {% for i in range%}
+            <li data-slide-to="{{i}}" data-target="#demo{{forloop.parentloop.counter}}"></li>
+            {% endfor %}
+          </ul>
+
+          <!--Slide Show Start here-->
+          <div class="carousel-inner">
+
+            <div class="carousel-item active">
+
+                {% for i in prod %}
+                <div class="col-xs-3 col-sm-3 col-md-3">
+                  <div class="card align-items-center" style="width: 16rem;">
+                    <img src='/media/{{i.image}}' class="card-img-top" alt="...">
+                    <div class="card-body">
+                      <h5 class="card-title" id="namepro{{i.id}}">{{i.product_name}}</h5>
+                      <p class="card-text my-1" style="height:48px">{{i.desc|slice:"0:38  "}}...</p>
+                      <h6>Rs. {{i.price}}</h6>
+                      <span id="divpro{{i.id}}" class="divpro">
+                      <button class="btn btn-primary cart" id="pro{{i.id}}">Add to Cart</button>
+                      </span>
+                      <a href="/shop/productView/{{i.id}}">
+                          <button class="btn btn-primary cart" id="qv{{i.id}}">Overview</button>
+                      </a>
+                    </div>
+                  </div>
+                </div>
+                  {% if forloop.counter|divisibleby:4 and forloop.counter > 0 and not forloop.last %}
+                    </div>
+                    <div class="carousel-item">
+                  {% endif %}
+                  {% endfor %}
+              </div>
+          </div>
+        </div>
+        <a class="carousel-control-prev " href="#demo{{forloop.counter}}"  data-slide="prev">
+            <span class="carousel-control-prev-icon" ></span>
+        </a>
+        <a class="carousel-control-next" href="#demo{{forloop.counter}}"  data-slide="next">
+            <span class="carousel-control-next-icon" ></span>
+        </a>
+      </div>
+        {% endfor %}
+  </div>
+
+{% endblock %}
+
+
+
+
+
+{% block js %}
+
+
+
+<script>
+
+    // Find out the cart items from localStorage
+    if(localStorage.getItem('cart') == null){
+    var cart = {};
+    }
+
+    else{
+
+    cart = JSON.parse(localStorage.getItem('cart'));
+    updateCart(cart);
+    
+    }
+
+
+    // If the add to cart button is clicked / add increment the items in cart
+    //<!--jQuery-->
+    $('.divpro').on('click', 'button.cart', function(){
+    var idstr = this.id.toString();  // ID of the class
+    if(cart[idstr] == undefined){
+    qty = 1;
+    name = document.getElementById('name' + idstr).innerHTML;
+    cart[idstr] = [name, qty];
+    }
+
+    else{
+    qty = cart[idstr][1] + 1;
+    }
+
+    updateCart(cart);
+    });
+
+    // Add popover to cart
+    
+    updatePopover(cart);
+
+
+    // update popover
+    function updatePopover(cart){
+        var popStr = "";
+        var i = 1;
+        popStr = popStr + "<h5>Your Cart</h5> <div class='container'>"
+
+        for (var items in cart){
+            if (cart[items][1] != 0){
+            popStr = popStr + i + " " + document.getElementById('name' + items).innerHTML.slice(0, 20) + "...  Qty: " + cart[items][1] + "<br> ";
+            // console.log(cart[items]);
+            i = i + 1;
+            }
+        }
+       
+        if(cart[items] != null){
+            popStr = popStr + "</div>  <div class='my-2'> <a href='checkout/'><button class='btn btn-primary'>Checkout</button></a> <button class='btn btn-primary' onclick='clearCart()'>ClearCart</button> </div>";
+            }
+        else{
+            popStr = popStr + '<h6>Now cart is empty!</h6>';
+        }
+    
+
+        document.getElementById('pop_cart').setAttribute('data-content', popStr);
+        $('#pop_cart').popover({sanitize:false});
+        $('#pop_cart').popover('show');
+    }
+
+    // update the span in the template
+    function updateCart(cart){
+        var sum = 0;
+        for (var items in cart){
+            sum = sum + cart[items][1];
+            // document.getElementById('div' + items).innerHTML = "<button id='minus" + items + "' class='btn btn-primary minus'>-</button>" +  "<span id='val" + items + "'> " + cart[items][1] + " </span> <button id='plus" + items + "' class='btn btn-primary plus'>+</button>";
+            document.getElementById('div' + items).innerHTML = `<button id="minus${items}" class="btn btn-primary minus">-</button> <span id="val${items}"> ${cart[items][1]} </span> <button id="plus${items}" class="btn btn-primary plus">+</button>`;
+            
+        }
+        localStorage.setItem('cart', JSON.stringify(cart));
+        document.getElementById('cart').innerHTML = sum;
+        updatePopover(cart);
+        console.log(cart);
+    }
+
+    // clearCart
+    function clearCart(){
+        cart = JSON.parse(localStorage.getItem('cart'));
+        for (var items in cart){
+            document.getElementById('div' + items).innerHTML = '<button class="btn btn-primary cart" id="'+ items +'">Add to Cart</button>';
+        }
+        localStorage.clear();
+        cart = {};
+        updateCart(cart);
+    }
+
+
+    // Click Plus button is here...
+    $('.divpro').on("click", "button.plus", function(){
+        console.log('plus clicked');
+        a = this.id.slice(4, );
+        cart[a][1] = cart[a][1] + 1;
+        document.getElementById('val' + a).innerHTML = cart[a][1];
+        updateCart(cart);
+        
+    });
+
+
+
+    // Click Minus button is here...
+    $('.divpro').on("click", "button.minus", function(){
+        console.log('minus clicked');
+        a = this.id.slice(5, );
+        cart[a][1] = cart[a][1] - 1;
+        cart[a][1] = Math.max(0, cart[a][1]);
+        document.getElementById('val' + a).innerHTML = cart[a][1];
+        updateCart(cart);
+        
+    });
+</script>
+
+
+{% endblock %}
